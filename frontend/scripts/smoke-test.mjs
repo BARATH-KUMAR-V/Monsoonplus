@@ -172,6 +172,48 @@ if (chennai?.evaluation) {
   );
   check('gate-by-regime present', Boolean(evaluation.gate_by_regime));
   check('honesty notes array present', Array.isArray(evaluation.honesty_notes));
+
+  // Modality ablation (Model Lab "Does each modality earn its place?"). Optional as a
+  // whole, but if any part is present it must be complete and self-consistent.
+  const byName = Object.fromEntries((evaluation.baselines || []).map((b) => [b.name, b]));
+  const ablationNames = [
+    'traffic_only_masked',
+    'traffic_weather_masked',
+    'traffic_only_linear',
+    'traffic_weather_linear',
+    'traffic_weather_satellite_linear',
+  ];
+  const present = ablationNames.filter((name) => name in byName);
+  check(
+    'modality-ablation baselines are all present or all absent',
+    present.length === 0 || present.length === ablationNames.length,
+    `found ${present.join(', ') || 'none'}`,
+  );
+  if (present.length) {
+    check(
+      'ablation rows have a finite heavy-rain MAE',
+      ablationNames.every((name) => Number.isFinite(byName[name]?.mae_by_label?.heavy_rain)),
+    );
+    check(
+      'linear-probe rows were scored on the same windows as the model',
+      ['traffic_only_linear', 'traffic_weather_linear', 'traffic_weather_satellite_linear'].every(
+        (name) =>
+          Object.values(byName[name].count_by_label).reduce((a, b) => a + b, 0) === evaluation.test_windows,
+      ),
+      `model test_windows = ${evaluation.test_windows}`,
+    );
+    check(
+      'ablation methodology is stated alongside the numbers',
+      typeof evaluation.ablation_methodology === 'string' && evaluation.ablation_methodology.length > 40,
+    );
+  }
+  if (evaluation.network_ablation) {
+    const names = (evaluation.network_ablation.rows || []).map((row) => row.name);
+    check(
+      'retrained-network ablation has traffic_only / traffic_weather / all_three',
+      ['traffic_only', 'traffic_weather', 'all_three'].every((name) => names.includes(name)),
+    );
+  }
 } else {
   check('evaluation present', false);
 }

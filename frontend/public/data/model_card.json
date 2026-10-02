@@ -38,6 +38,7 @@
     "The satellite branch trains on synthetic NDWI derived from rainfall accumulation unless you supply a real Earth Engine export. Where that is the case, 'trimodal' means three trained branches, one of which learned from a simulated signal.",
     "Weather is queried at one city point and spread across segments by a per-segment rain bias. It is not per-road measurement.",
     "METR-LA is Los Angeles freeway data. Pretraining on it transfers temporal dynamics, not Chennai-specific behaviour.",
+    "The modality-ablation results are three different questions, not one controlled study: the retrained variants use a small budget and are not the final checkpoint; the masked variants measure what the finished network leans on, not what a smaller network could achieve; the linear probe is a deliberately weaker model family. All three use the synthetic window.",
     "This is a screening and planning aid, not a safety system. Do not use it to decide whether a flooded road is passable."
   ],
   "generated_at": "2026-10-01T20:50:38+00:00",
@@ -47,5 +48,6 @@
     "Air quality data from Open-Meteo.com (CC BY 4.0)",
     "(c) OpenStreetMap contributors",
     "Contains modified Copernicus Sentinel data"
-  ]
+  ],
+  "ablation_methodology": "Modality importance is checked three independent ways, all on the synthetic Chennai window. (1) Retrained: a fresh network per variant, trained without the named modalities (ml/training/ablations.py). (2) Switched off: the final trained network re-scored with weather and/or satellite masked at inference (traffic_only_masked / traffic_weather_masked). (3) Linear probe: a pooled ridge regression per variant on the same test windows (traffic_only_linear / traffic_weather_linear / traffic_weather_satellite_linear; python ml/reference/ablation_numpy.py)."
 }

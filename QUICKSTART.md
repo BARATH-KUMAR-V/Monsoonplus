@@ -41,11 +41,16 @@ download the four JSON files it produces.
 ## Verify everything
 
 ```bash
-python -m pytest -q                    # 48 tests
+python -m pytest -q                    # 75 tests
 python -m config.segments              # network config self-check
 python -m ml.export.check_palette      # WCAG contrast + colourblind check
-cd frontend && npm run smoke           # 31 data-integrity checks
+python -m ml.training.linear_probe     # modality ablation, NumPy only, <1 s
+cd frontend && npm run smoke           # 40 data-integrity checks
 ```
+
+Without `torch_geometric` installed, run the model on the pure-PyTorch twin layers:
+`load_checkpoint("ml/checkpoints/monsoonplus_final.pt", graph_layer="dense_gcn")`. See
+[`ml/README.md`](ml/README.md).
 
 ---
 

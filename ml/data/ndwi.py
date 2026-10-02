@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -79,6 +80,21 @@ class NdwiSnapshot:
         }
 
 
+def _get_ee_project() -> Optional[str]:
+    """Read EARTHENGINE_PROJECT from environment or .env file."""
+    if "EARTHENGINE_PROJECT" in os.environ:
+        return os.environ.get("EARTHENGINE_PROJECT") or None
+    env_path = REPO_ROOT / ".env"
+    if env_path.exists():
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line.startswith("EARTHENGINE_PROJECT="):
+                _, _, val = line.partition("=")
+                val = val.strip().strip('"').strip("'")
+                return val or None
+    return None
+
+
 def earth_engine_available() -> bool:
     """True only if the ``ee`` package is installed *and* already authenticated.
 
@@ -90,7 +106,8 @@ def earth_engine_available() -> bool:
     except ImportError:
         return False
     try:
-        ee.Initialize()
+        project = _get_ee_project()
+        ee.Initialize(project=project)
         return True
     except Exception:  # noqa: BLE001 - not authenticated, or no project set
         return False

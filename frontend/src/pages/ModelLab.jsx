@@ -246,6 +246,166 @@ function GateBreakdown({ evaluation }) {
   );
 }
 
+/**
+ * Does each modality earn its place?
+ *
+ * Three independent tests, each read straight from what the pipeline exported (nothing
+ * typed in), shown side by side because each answers a slightly different question:
+ *
+ *   1. Retrained without the modality  - a fresh network per variant (ml/training/ablations.py).
+ *      The strongest evidence, but a small budget run, so its numbers are NOT the final
+ *      checkpoint's.
+ *   2. Trained network, input switched off - the finished model re-scored with weather and/or
+ *      satellite masked at inference. Shows what it leans on, not what a smaller model could do.
+ *   3. Linear probe - a deliberately weaker model family (ml/training/linear_probe.py), scored
+ *      on the same test windows as the network.
+ *
+ * Bars share one scale across the three groups so their lengths are comparable.
+ */
+function ablationDrop(before, after) {
+  if (!before || after == null) return null;
+  return (100 * (before - after)) / before;
+}
+
+function AblationGroup({ title, question, steps, maxValue, takeaway }) {
+  const usable = steps.filter((step) => step.value != null);
+  if (usable.length < 2) return null;
+  return (
+    <section style={{ marginTop: 14 }} aria-label={title}>
+      <div style={{ fontWeight: 650 }}>{title}</div>
+      <div className="small muted">{question}</div>
+      <div className="rows" style={{ marginTop: 6 }}>
+        {usable.map((step) => (
+          <div key={step.label} className="row">
+            <div className="row-top">
+              <div className="row-name">{step.label}</div>
+              <b>{step.value.toFixed(2)} km/h</b>
+            </div>
+            <div
+              style={{
+                height: 8,
+                borderRadius: 4,
+                background: 'var(--surface-sunk)',
+                marginTop: 4,
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  height: '100%',
+                  width: `${maxValue ? (step.value / maxValue) * 100 : 0}%`,
+                  background: `var(--${step.tone})`,
+                  borderRadius: 4,
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      {takeaway && (
+        <p className="small" style={{ margin: '8px 0 0' }}>
+          {takeaway}
+        </p>
+      )}
+    </section>
+  );
+}
+
+function ModalityAblation({ evaluation }) {
+  const heavy = (row) => row?.mae_by_label?.heavy_rain ?? null;
+  const baseline = (name) => evaluation?.baselines?.find((b) => b.name === name);
+
+  const network = evaluation?.network_ablation;
+  const retrained = Object.fromEntries((network?.rows || []).map((row) => [row.name, row.mae_heavy_rain]));
+  const full = heavy(evaluation?.model);
+
+  const groups = [
+    {
+      title: '1. Retrained without the modality',
+      question: 'A fresh network per variant, same data and budget.',
+      steps: [
+        { label: 'Traffic only', value: retrained.traffic_only, tone: 'jammed' },
+        { label: '+ Weather', value: retrained.traffic_weather, tone: 'slow' },
+        { label: '+ Satellite (all three)', value: retrained.all_three, tone: 'smooth' },
+      ],
+      takeaway: (() => {
+        const weather = ablationDrop(retrained.traffic_only, retrained.traffic_weather);
+        const satellite = ablationDrop(retrained.traffic_weather, retrained.all_three);
+        if (weather == null || satellite == null) return null;
+        const move = (value) => `${value >= 0 ? 'cuts' : 'raises'} it by ${Math.abs(value).toFixed(1)}%`;
+        return `Adding weather ${move(weather)}; adding satellite on top ${move(satellite)} (heavy-rain error, retrained networks).`;
+      })(),
+    },
+    {
+      title: '2. Trained network, input switched off',
+      question: 'The final checkpoint re-scored with inputs masked at inference (not retrained).',
+      steps: [
+        { label: 'Traffic only', value: heavy(baseline('traffic_only_masked')), tone: 'jammed' },
+        { label: '+ Weather', value: heavy(baseline('traffic_weather_masked')), tone: 'slow' },
+        { label: 'All three (the model)', value: full, tone: 'smooth' },
+      ],
+      takeaway: (() => {
+        const rise = ablationDrop(full, heavy(baseline('traffic_only_masked')));
+        const satellite = ablationDrop(full, heavy(baseline('traffic_weather_masked')));
+        if (rise == null) return null;
+        const move = (value) => `${value <= 0 ? 'raises' : 'lowers'} it by ${Math.abs(value).toFixed(1)}%`;
+        return `Switching off weather and satellite ${move(rise).replace(' it', ' heavy-rain error')}${
+          satellite != null ? `; switching off satellite alone ${move(satellite)}` : ''
+        }. The network was never trained to run without them, so this shows how much it relies on them, not how a smaller model would do.`;
+      })(),
+    },
+    {
+      title: '3. Linear probe',
+      question: 'A much simpler model family, same held-out test windows.',
+      steps: [
+        { label: 'Traffic only', value: heavy(baseline('traffic_only_linear')), tone: 'jammed' },
+        { label: '+ Weather', value: heavy(baseline('traffic_weather_linear')), tone: 'slow' },
+        { label: '+ Satellite', value: heavy(baseline('traffic_weather_satellite_linear')), tone: 'smooth' },
+      ],
+      takeaway: (() => {
+        const weather = ablationDrop(
+          heavy(baseline('traffic_only_linear')),
+          heavy(baseline('traffic_weather_linear')),
+        );
+        const satellite = ablationDrop(
+          heavy(baseline('traffic_weather_linear')),
+          heavy(baseline('traffic_weather_satellite_linear')),
+        );
+        if (weather == null) return null;
+        const move = (value) => `${value >= 0 ? 'cuts' : 'raises'} heavy-rain error by ${Math.abs(value).toFixed(1)}%`;
+        return `For a plain linear model, weather history ${move(weather)}${
+          satellite != null ? `; adding the satellite features then ${move(satellite).replace(' heavy-rain error', ' it')}` : ''
+        }.`;
+      })(),
+    },
+  ].filter((group) => group.steps.filter((s) => s.value != null).length >= 2);
+
+  if (!groups.length) return null;
+
+  const maxValue = Math.max(
+    ...groups.flatMap((group) => group.steps.map((step) => step.value || 0)),
+  );
+
+  return (
+    <Card
+      title="Does each modality earn its place?"
+      subtitle="Heavy-rain MAE as modalities are added, measured three independent ways"
+      actions={<Chip tone="neutral">Ablation study</Chip>}
+    >
+      {groups.map((group) => (
+        <AblationGroup key={group.title} {...group} maxValue={maxValue} />
+      ))}
+      <Provenance>
+        {network?.method && <>{network.method} </>}
+        {evaluation?.ablation_methodology}
+        {' '}Reproduce with <code>python -m ml.training.ablations</code>,{' '}
+        <code>python -m ml.export.export_predictions --refresh-ablation</code> and{' '}
+        <code>python ml/reference/ablation_numpy.py</code>.
+      </Provenance>
+    </Card>
+  );
+}
+
 function Playground() {
   const { predictor } = useStore();
   const [rain, setRain] = useState(60);
@@ -503,6 +663,10 @@ export default function ModelLab() {
             </Card>
 
             <GateBreakdown evaluation={chennai.evaluation} />
+          </div>
+
+          <div style={{ marginTop: 14 }}>
+            <ModalityAblation evaluation={chennai.evaluation} />
           </div>
 
           <div className="grid g-2" style={{ marginTop: 14 }}>

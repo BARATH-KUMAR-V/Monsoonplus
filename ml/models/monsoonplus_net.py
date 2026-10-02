@@ -21,7 +21,7 @@ Design points that matter for the project's claims
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Iterable, Optional
 
 import torch
 import torch.nn as nn
@@ -155,6 +155,42 @@ class MonsoonPlusNet(nn.Module):
     def num_horizons(self) -> int:
         return len(self.config.horizons)
 
+    def modality_masked(
+        self,
+        traffic: torch.Tensor,
+        weather: torch.Tensor,
+        satellite: torch.Tensor,
+        edge_index: torch.Tensor,
+        edge_weight: Optional[torch.Tensor] = None,
+        drop: Iterable[str] = ("weather", "satellite"),
+    ) -> ModelOutput:
+        """Run the *already-trained* network with some modalities switched off.
+
+        This is an inference-time sensitivity probe, not a retrained ablation: it
+        measures what the trained network currently leans on, using the same
+        availability mask the METR-LA phase uses, so the gate renormalises over the
+        remaining modalities and the dropped branches contribute nothing. (For the
+        stronger "retrain without it" test see ``ml/training/ablations.py``.)
+
+        ``drop`` is any subset of ``{"weather", "satellite"}``. Traffic is never
+        droppable -- it is the one signal always available live, and the head predicts
+        a residual around its last speed.
+        """
+        drop = set(drop)
+        unknown = drop - {"weather", "satellite"}
+        if unknown:
+            raise ValueError(
+                f"cannot drop {sorted(unknown)}; only 'weather' and 'satellite' are optional"
+            )
+        availability = torch.tensor(
+            [1.0, 0.0 if "weather" in drop else 1.0, 0.0 if "satellite" in drop else 1.0],
+            device=traffic.device,
+            dtype=traffic.dtype,
+        )
+        return self(
+            traffic, weather, satellite, edge_index, edge_weight, availability=availability
+        )
+
     def forward(
         self,
         traffic: torch.Tensor,
@@ -238,7 +274,10 @@ def build_model(graph_layer: str = "gcn", **overrides) -> MonsoonPlusNet:
 
 
 def load_checkpoint(
-    path, map_location: str = "cpu", strict: bool = True
+    path,
+    map_location: str = "cpu",
+    strict: bool = True,
+    graph_layer: Optional[str] = None,
 ) -> tuple[MonsoonPlusNet, dict]:
     """Rebuild a model from a checkpoint written by ``ml/training/train.py``.
 
@@ -247,9 +286,17 @@ def load_checkpoint(
     should be a loud failure here, because ``strict=False`` only forgives missing or
     unexpected keys and will still raise on a shape conflict -- better to see it at
     load time than to silently load half a model.
+
+    ``graph_layer`` swaps the spatial backend at load time. The one supported swap is
+    between a PyG layer and its pure-PyTorch twin (``gcn`` <-> ``dense_gcn``,
+    ``gat`` <-> ``dense_gat``): the twins share parameter names and shapes, so a
+    checkpoint trained with torch_geometric runs without it. Swapping GCN for GAT is
+    a different architecture and fails loudly under ``strict=True``.
     """
     blob = torch.load(path, map_location=map_location, weights_only=False)
     config = ModelConfig(**blob["config"])
+    if graph_layer is not None:
+        config.graph_layer = graph_layer
     model = MonsoonPlusNet(config)
     model.load_state_dict(blob["state_dict"], strict=strict)
     model.eval()

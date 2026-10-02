@@ -11,6 +11,11 @@ Writes into ``frontend/public/data/``:
     predictions_live_template.json     schema example only, all values null
     model_card.json                    what was trained on what, and the caveats
 
+Refresh only the modality-ablation blocks (no retraining, no LSTM re-fit, so every other
+number in the committed JSON is left exactly as it was):
+
+    python -m ml.export.export_predictions --refresh-ablation
+
 Hard rules enforced here
 ------------------------
 * **No NaN.** ``json.dump`` happily writes bare ``NaN``, which is not valid JSON and
@@ -51,7 +56,15 @@ from ml.data.chennai_synthetic import (
 )
 from ml.data.windowing import LABELS, build_chennai_datasets, build_metr_la_datasets
 from ml.models.monsoonplus_net import MonsoonPlusNet, load_checkpoint
-from ml.training.evaluate import evaluate_everything, save_report
+from ml.training.evaluate import (
+    compare_to_baselines,
+    evaluate_everything,
+    masked_baselines,
+    save_report,
+)
+from ml.training.linear_probe import attach_to_evaluation as attach_linear_probe
+from ml.training.linear_probe import run_probe
+from ml.training.losses import error_breakdown
 from ml.training.train import CHECKPOINT_DIR, build_graph_for, resolve_device
 
 OUTPUT_DIR = REPO_ROOT / "frontend" / "public" / "data"
@@ -59,6 +72,10 @@ OUTPUT_DIR = REPO_ROOT / "frontend" / "public" / "data"
 # The forecast grid the UI scrubs through: rain levels x horizons, per segment.
 RAIN_LEVELS = [0, 5, 10, 20, 30, 40, 55, 70, 85, 100]
 SLIDER_MINUTES = [0, 15, 30, 45, 60]
+
+# Retrained-network modality ablation written by `python -m ml.training.ablations`.
+ABLATION_REPORT = REPO_ROOT / "ml" / "reports" / "ablations.json"
+NETWORK_ABLATION_VARIANTS = ("traffic_only", "traffic_weather", "all_three")
 
 
 def _clean(value: Any) -> Any:
@@ -125,6 +142,138 @@ def network_payload() -> dict:
 
 
 @torch.no_grad()
+def network_ablation_payload() -> Optional[dict]:
+    """The retrained-network modality ablation, trimmed for the Model Lab.
+
+    Reads ``ml/reports/ablations.json`` (``python -m ml.training.ablations``). Returns
+    None when that report has not been produced, so the UI simply omits the section
+    rather than showing placeholders.
+    """
+    if not ABLATION_REPORT.exists():
+        return None
+    report = json.loads(ABLATION_REPORT.read_text(encoding="utf-8"))
+    rows = {row["name"]: row for row in report.get("rows", [])}
+    if not all(name in rows for name in NETWORK_ABLATION_VARIANTS):
+        return None
+    keep = (
+        "name",
+        "variant",
+        "mae_overall",
+        "mae_clear",
+        "mae_rain",
+        "mae_heavy_rain",
+        "rain_weighted_mae",
+        "gate_by_regime",
+    )
+    return {
+        "source": "ml/reports/ablations.json",
+        "method": (
+            "Each variant is a fresh network trained from scratch on identical data, seed "
+            f"and epoch budget ({report.get('epochs_per_variant')} epochs, "
+            f"{report.get('days')}-day synthetic window, seed {report.get('seed')}), with the "
+            "named modalities masked out of training and evaluation. A small-budget "
+            "comparison that stands on its own: its numbers are NOT the final checkpoint's."
+        ),
+        "epochs_per_variant": report.get("epochs_per_variant"),
+        "days": report.get("days"),
+        "seed": report.get("seed"),
+        "rows": [{key: rows[name][key] for key in keep if key in rows[name]}
+                 for name in NETWORK_ABLATION_VARIANTS],
+    }
+
+
+def attach_ablation_blocks(evaluation: dict, days: int, seed: int = 2024) -> dict:
+    """Add the linear-probe rows and the retrained-network ablation to an evaluation.
+
+    Idempotent, so it is safe in both the full export and ``--refresh-ablation``.
+    """
+    attach_linear_probe(evaluation, run_probe(days=days, seed=seed))
+    network = network_ablation_payload()
+    if network is not None:
+        evaluation["network_ablation"] = network
+    else:
+        evaluation.pop("network_ablation", None)
+    return evaluation
+
+
+def refresh_ablation(args: argparse.Namespace, device: torch.device, model) -> None:
+    """Patch ONLY the ablation blocks into the committed JSON, from the checkpoint.
+
+    Re-scores the trained network on the held-out test windows (to build the
+    ``*_masked`` rows) and re-fits the linear probe, then merges both into the existing
+    ``predictions_synthetic_chennai.json`` / ``model_card.json``. Nothing is retrained
+    and the LSTM baseline is not re-fitted, so every other number stays byte-identical.
+    Refuses to run if the checkpoint does not reproduce the file's recorded model
+    metrics -- a mismatch means this checkpoint is not the one the JSON was built from.
+    """
+    from ml.training.train import evaluate as run_eval
+
+    path = OUTPUT_DIR / "predictions_synthetic_chennai.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    evaluation = payload["evaluation"]
+
+    chennai = build_chennai_datasets(days=args.days)
+    model.set_normalisation(chennai.normalisation)
+    edge_index, edge_weight, _ = build_graph_for(chennai.test.traffic.shape[1], chennai)
+    edge_index, edge_weight = edge_index.to(device), edge_weight.to(device)
+
+    predictions, targets, labels, _, _ = run_eval(
+        model, chennai.test, edge_index, edge_weight, device, collect_gate=True
+    )
+    model_now = error_breakdown(predictions, targets, labels).to_dict()
+    recorded = evaluation["model"]
+    for key in ("mae_overall", "rain_weighted_mae"):
+        if abs(model_now[key] - recorded[key]) > 2e-3:
+            raise SystemExit(
+                f"checkpoint does not reproduce the file's model metrics ({key}: "
+                f"{model_now[key]} now vs {recorded[key]} recorded). Run the full export "
+                "instead of --refresh-ablation."
+            )
+
+    masked = masked_baselines(model, chennai.test, edge_index, edge_weight, device)
+    masked_rows = [c.to_dict() for c in compare_to_baselines(error_breakdown(
+        predictions, targets, labels), masked)]
+    masked_names = {row["name"] for row in masked_rows}
+    evaluation["baselines"] = [
+        b for b in evaluation["baselines"] if b["name"] not in masked_names
+    ] + masked_rows
+
+    attach_ablation_blocks(evaluation, days=args.days)
+    print(f"wrote {write_json(path, payload)}")
+
+    card_path = OUTPUT_DIR / "model_card.json"
+    card = json.loads(card_path.read_text(encoding="utf-8"))
+    apply_ablation_to_model_card(card, evaluation)
+    print(f"wrote {write_json(card_path, card)}")
+    print(f"wrote {save_report(evaluation, 'eval_synthetic_chennai')}")
+
+
+def apply_ablation_to_model_card(card: dict, evaluation: dict) -> dict:
+    """Describe the three modality studies in the model card, once (idempotent)."""
+    card["ablation_methodology"] = (
+        "Modality importance is checked three independent ways, all on the synthetic "
+        "Chennai window. (1) Retrained: a fresh network per variant, trained without the "
+        "named modalities (ml/training/ablations.py). (2) Switched off: the final trained "
+        "network re-scored with weather and/or satellite masked at inference "
+        "(traffic_only_masked / traffic_weather_masked). (3) Linear probe: a pooled ridge "
+        "regression per variant on the same test windows "
+        "(traffic_only_linear / traffic_weather_linear / traffic_weather_satellite_linear; "
+        "python ml/reference/ablation_numpy.py)."
+    )
+    marker = "The modality-ablation results"
+    limitations = [x for x in card.get("known_limitations", []) if not x.startswith(marker)]
+    limitations.insert(
+        -1,
+        f"{marker} are three different questions, not one controlled study: the retrained "
+        "variants use a small budget and are not the final checkpoint; the masked variants "
+        "measure what the finished network leans on, not what a smaller network could "
+        "achieve; the linear probe is a deliberately weaker model family. All three use "
+        "the synthetic window.",
+    )
+    card["known_limitations"] = limitations
+    return card
+
+
 def forecast_grid(
     model: MonsoonPlusNet,
     device: torch.device,
@@ -413,6 +562,12 @@ def main(argv: Optional[list[str]] = None) -> None:
     parser.add_argument("--metr-la-sensors", type=int, default=64)
     parser.add_argument("--skip-metr-la", action="store_true")
     parser.add_argument("--no-lstm", action="store_true")
+    parser.add_argument(
+        "--refresh-ablation",
+        action="store_true",
+        help="only patch the modality-ablation blocks into the committed JSON "
+        "(no retraining, nothing else changes)",
+    )
     args = parser.parse_args(argv)
 
     device = resolve_device(args.device)
@@ -426,6 +581,11 @@ def main(argv: Optional[list[str]] = None) -> None:
     model, meta = load_checkpoint(checkpoint_path, map_location=str(device))
     model.to(device)
     print(f"loaded {checkpoint_path.name}  meta={meta}")
+
+    if args.refresh_ablation:
+        refresh_ablation(args, device, model)
+        print("\nablation blocks refreshed")
+        return
 
     generated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
@@ -441,6 +601,7 @@ def main(argv: Optional[list[str]] = None) -> None:
         speeds_for_historical=window.speeds,
         minute_of_day=window.minute_of_day,
     )
+    attach_ablation_blocks(chennai_report, days=args.days)
     grid = forecast_grid(model, device, window, chennai.normalisation)
 
     chennai_payload = {
@@ -537,6 +698,7 @@ def main(argv: Optional[list[str]] = None) -> None:
         "generated_at": generated_at,
         "attributions": ATTRIBUTIONS,
     }
+    apply_ablation_to_model_card(model_card, chennai_report)
     print(f"wrote {write_json(OUTPUT_DIR / 'model_card.json', model_card)}")
     print("\nexport complete")
 

@@ -36,6 +36,15 @@ from ml.training.losses import ErrorBreakdown, error_breakdown
 
 REPORT_DIR = REPO_ROOT / "ml" / "reports"
 
+# Inference-time modality ablation on the TRAINED network: (traffic, weather, satellite)
+# availability, applied on top of what the dataset itself provides. Not retrained --
+# it shows what the finished model currently leans on. ml/training/ablations.py is the
+# retrain-without-it version; ml/training/linear_probe.py is the model-family-free one.
+MASKED_VARIANTS = {
+    "traffic_only_masked": (1.0, 0.0, 0.0),
+    "traffic_weather_masked": (1.0, 1.0, 0.0),
+}
+
 
 def _improvement(model_mae: float, baseline_mae: float) -> Optional[float]:
     """Percent reduction in MAE. None when the baseline number is unavailable."""
@@ -150,6 +159,35 @@ def model_predictions(
     return predictions, targets, labels, gates, rain
 
 
+def masked_baselines(
+    model: MonsoonPlusNet,
+    dataset,
+    edge_index: torch.Tensor,
+    edge_weight: torch.Tensor,
+    device: torch.device,
+) -> dict[str, ErrorBreakdown]:
+    """Score the trained network with weather and/or satellite switched off.
+
+    Uses the same availability mask the METR-LA phase uses, so the gate renormalises
+    over the modalities that remain (``MonsoonPlusNet.modality_masked`` does the same
+    for a single batch). Only meaningful when the dataset carries all three modalities.
+    """
+    from ml.training.train import evaluate as run_eval
+
+    out: dict[str, ErrorBreakdown] = {}
+    for name, mask in MASKED_VARIANTS.items():
+        predictions, targets, labels, _, _ = run_eval(
+            model,
+            dataset,
+            edge_index,
+            edge_weight,
+            device,
+            availability_override=torch.tensor(mask, dtype=torch.float32),
+        )
+        out[name] = error_breakdown(predictions, targets, labels)
+    return out
+
+
 def gate_by_regime(gates: np.ndarray, labels: np.ndarray) -> dict[str, dict[str, float]]:
     """Mean gate weights per weather regime -- the Model Lab's modality breakdown.
 
@@ -230,8 +268,14 @@ def evaluate_everything(
     speeds_for_historical: Optional[np.ndarray] = None,
     minute_of_day: Optional[np.ndarray] = None,
     verbose: bool = True,
+    include_masked: bool = True,
 ) -> dict:
-    """Full evaluation of the model plus every baseline, on the TEST split."""
+    """Full evaluation of the model plus every baseline, on the TEST split.
+
+    ``include_masked`` adds the inference-time modality ablation rows
+    (``traffic_only_masked`` / ``traffic_weather_masked``) when the dataset carries all
+    three modalities; it is a no-op for METR-LA, which has no weather or satellite.
+    """
     from ml.training.train import build_graph_for
 
     edge_index, edge_weight, graph_info = build_graph_for(
@@ -281,6 +325,18 @@ def evaluate_everything(
             print(f"  lstm (no graph)  {baselines['lstm_no_graph'].headline()}")
 
     comparisons = compare_to_baselines(model_breakdown, baselines)
+
+    # Ablated copies of the model itself are reported next to the baselines but kept
+    # out of the honesty notes: "does the model beat a worse version of itself" is the
+    # ablation question, not the does-it-beat-a-naive-guess question the notes police.
+    ablation_comparisons: list[Comparison] = []
+    if include_masked and bool(np.all(splits.test.availability > 0)):
+        masked = masked_baselines(model, splits.test, edge_index, edge_weight, device)
+        ablation_comparisons = compare_to_baselines(model_breakdown, masked)
+        if verbose:
+            for name, breakdown in masked.items():
+                print(f"  {name:<16} {breakdown.headline()}")
+
     gate_summary = gate_by_regime(gates, labels)
     notes = honesty_notes(model_breakdown, comparisons)
 
@@ -305,7 +361,7 @@ def evaluate_everything(
         "horizons_minutes": HORIZONS_MINUTES,
         "graph": graph_info,
         "model": model_breakdown.to_dict(),
-        "baselines": [c.to_dict() for c in comparisons],
+        "baselines": [c.to_dict() for c in comparisons + ablation_comparisons],
         "gate_by_regime": gate_summary,
         "gate_shift_claim": gate_shift_claim(gate_summary),
         "per_segment": per_segment_mae(predictions, targets, labels),

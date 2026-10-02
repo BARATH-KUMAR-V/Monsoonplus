@@ -121,8 +121,14 @@ def evaluate(
     device: torch.device,
     batch_size: int = 128,
     collect_gate: bool = False,
+    availability_override: Optional[torch.Tensor] = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, Optional[np.ndarray], Optional[np.ndarray]]:
-    """Run the model over a dataset. Returns predictions, targets, labels, gates, rain."""
+    """Run the model over a dataset. Returns predictions, targets, labels, gates, rain.
+
+    ``availability_override`` is an optional ``(3,)`` 0/1 vector multiplied into every
+    batch's availability mask -- how ``evaluate.masked_baselines`` switches a modality
+    off at inference. ``None`` (the default) leaves behaviour exactly as before.
+    """
     model.eval()
     predictions, targets, labels, gates, rains = [], [], [], [], []
 
@@ -133,7 +139,11 @@ def evaluate(
             batch["satellite"].to(device),
             edge_index,
             edge_weight,
-            availability=batch["availability"].to(device),
+            availability=(
+                batch["availability"].to(device)
+                if availability_override is None
+                else batch["availability"].to(device) * availability_override.to(device)
+            ),
         )
         predictions.append(out.prediction.cpu().numpy())
         targets.append(batch["target"].numpy())
@@ -314,7 +324,12 @@ def find_log_files() -> list[Path]:
 
 def main(argv: Optional[list[str]] = None) -> dict:
     parser = argparse.ArgumentParser(description="Train MonsoonPlusNet")
-    parser.add_argument("--graph-layer", choices=("gcn", "gat"), default="gcn")
+    parser.add_argument(
+        "--graph-layer",
+        choices=("gcn", "gat", "dense_gcn", "dense_gat"),
+        default="gcn",
+        help="dense_* are pure-PyTorch twins of gcn/gat: no torch_geometric needed",
+    )
     parser.add_argument("--device", default="auto")
     parser.add_argument("--hidden", type=int, default=64)
     parser.add_argument("--batch-size", type=int, default=64)

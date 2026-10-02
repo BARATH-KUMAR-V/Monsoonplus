@@ -492,6 +492,226 @@
           "rain": 19.51,
           "heavy_rain": 21.13
         }
+      },
+      {
+        "name": "traffic_only_masked",
+        "mae_overall": 1.309,
+        "rmse_overall": 1.825,
+        "rain_weighted_mae": 1.658,
+        "mae_by_label": {
+          "clear": 1.112,
+          "rain": 1.402,
+          "heavy_rain": 2.064
+        },
+        "mae_by_horizon": {
+          "t+15": 0.978,
+          "t+30": 1.243,
+          "t+60": 1.704
+        },
+        "mae_by_label_horizon": {
+          "clear": {
+            "t+15": 0.87,
+            "t+30": 1.06,
+            "t+60": 1.406
+          },
+          "rain": {
+            "t+15": 1.043,
+            "t+30": 1.333,
+            "t+60": 1.831
+          },
+          "heavy_rain": {
+            "t+15": 1.38,
+            "t+30": 1.945,
+            "t+60": 2.868
+          }
+        },
+        "count_by_label": {
+          "clear": 1285,
+          "rain": 330,
+          "heavy_rain": 293
+        },
+        "model_improvement_percent_overall": 38.34,
+        "model_improvement_percent_by_label": {
+          "clear": 33.95,
+          "rain": 39.45,
+          "heavy_rain": 47.85
+        }
+      },
+      {
+        "name": "traffic_weather_masked",
+        "mae_overall": 0.833,
+        "rmse_overall": 1.241,
+        "rain_weighted_mae": 0.987,
+        "mae_by_label": {
+          "clear": 0.737,
+          "rain": 0.93,
+          "heavy_rain": 1.149
+        },
+        "mae_by_horizon": {
+          "t+15": 0.703,
+          "t+30": 0.801,
+          "t+60": 0.996
+        },
+        "mae_by_label_horizon": {
+          "clear": {
+            "t+15": 0.642,
+            "t+30": 0.712,
+            "t+60": 0.856
+          },
+          "rain": {
+            "t+15": 0.785,
+            "t+30": 0.903,
+            "t+60": 1.1
+          },
+          "heavy_rain": {
+            "t+15": 0.877,
+            "t+30": 1.076,
+            "t+60": 1.493
+          }
+        },
+        "count_by_label": {
+          "clear": 1285,
+          "rain": 330,
+          "heavy_rain": 293
+        },
+        "model_improvement_percent_overall": 3.17,
+        "model_improvement_percent_by_label": {
+          "clear": 0.3,
+          "rain": 8.64,
+          "heavy_rain": 6.27
+        }
+      },
+      {
+        "name": "traffic_only_linear",
+        "mae_overall": 1.093,
+        "rmse_overall": 1.547,
+        "rain_weighted_mae": 1.321,
+        "mae_by_label": {
+          "clear": 0.959,
+          "rain": 1.185,
+          "heavy_rain": 1.576
+        },
+        "mae_by_horizon": {
+          "t+15": 0.831,
+          "t+30": 1.049,
+          "t+60": 1.4
+        },
+        "mae_by_label_horizon": {
+          "clear": {
+            "t+15": 0.751,
+            "t+30": 0.92,
+            "t+60": 1.207
+          },
+          "rain": {
+            "t+15": 0.893,
+            "t+30": 1.145,
+            "t+60": 1.517
+          },
+          "heavy_rain": {
+            "t+15": 1.111,
+            "t+30": 1.506,
+            "t+60": 2.111
+          }
+        },
+        "count_by_label": {
+          "clear": 1285,
+          "rain": 330,
+          "heavy_rain": 293
+        },
+        "model_improvement_percent_overall": 26.17,
+        "model_improvement_percent_by_label": {
+          "clear": 23.36,
+          "rain": 28.35,
+          "heavy_rain": 31.66
+        }
+      },
+      {
+        "name": "traffic_weather_linear",
+        "mae_overall": 0.968,
+        "rmse_overall": 1.388,
+        "rain_weighted_mae": 1.11,
+        "mae_by_label": {
+          "clear": 0.887,
+          "rain": 1.017,
+          "heavy_rain": 1.272
+        },
+        "mae_by_horizon": {
+          "t+15": 0.767,
+          "t+30": 0.925,
+          "t+60": 1.214
+        },
+        "mae_by_label_horizon": {
+          "clear": {
+            "t+15": 0.719,
+            "t+30": 0.85,
+            "t+60": 1.091
+          },
+          "rain": {
+            "t+15": 0.814,
+            "t+30": 0.982,
+            "t+60": 1.256
+          },
+          "heavy_rain": {
+            "t+15": 0.922,
+            "t+30": 1.189,
+            "t+60": 1.703
+          }
+        },
+        "count_by_label": {
+          "clear": 1285,
+          "rain": 330,
+          "heavy_rain": 293
+        },
+        "model_improvement_percent_overall": 16.63,
+        "model_improvement_percent_by_label": {
+          "clear": 17.14,
+          "rain": 16.52,
+          "heavy_rain": 15.33
+        }
+      },
+      {
+        "name": "traffic_weather_satellite_linear",
+        "mae_overall": 0.961,
+        "rmse_overall": 1.376,
+        "rain_weighted_mae": 1.093,
+        "mae_by_label": {
+          "clear": 0.885,
+          "rain": 1.002,
+          "heavy_rain": 1.246
+        },
+        "mae_by_horizon": {
+          "t+15": 0.764,
+          "t+30": 0.919,
+          "t+60": 1.199
+        },
+        "mae_by_label_horizon": {
+          "clear": {
+            "t+15": 0.717,
+            "t+30": 0.848,
+            "t+60": 1.089
+          },
+          "rain": {
+            "t+15": 0.809,
+            "t+30": 0.97,
+            "t+60": 1.226
+          },
+          "heavy_rain": {
+            "t+15": 0.917,
+            "t+30": 1.172,
+            "t+60": 1.649
+          }
+        },
+        "count_by_label": {
+          "clear": 1285,
+          "rain": 330,
+          "heavy_rain": 293
+        },
+        "model_improvement_percent_overall": 16.02,
+        "model_improvement_percent_by_label": {
+          "clear": 16.95,
+          "rain": 15.27,
+          "heavy_rain": 13.56
+        }
       }
     ],
     "gate_by_regime": {
@@ -591,8 +811,97 @@
       }
     ],
     "honesty_notes": [
-      "Heavy-rain error is 1.5x the clear-weather error (1.08 vs 0.73 km/h). Heavy rain remains the hard case; the cost-sensitive loss narrows this gap but does not close it."
-    ]
+      "Heavy-rain error is 1.5x the clear-weather error (1.08 vs 0.73 km/h). Heavy rain remains the hard case; the cost-sensitive loss narrows this gap but does not close it.",
+      "Modality ablation (linear probe, same held-out test windows as the network): a traffic-only model reaches 1.58 km/h MAE in heavy rain. Adding weather history cuts that by 19.3% (1.27 km/h). Adding the satellite NDWI/wetness features on top cuts it a further 2.0% (1.25 km/h) even for a LINEAR model, which is what this generator is built to produce: NDWI tracks accumulated wetness over many hours, which a 2-hour weather history cannot reveal. The satellite branch is therefore not decorative here -- but the signal is synthetic, and real Sentinel-2 NDWI may behave differently."
+    ],
+    "ablation_methodology": "Three pooled ridge-regression linear probes, identical except for which inputs they see (traffic only / + weather / + satellite). They are fitted on the chronological training split, tuned on validation, and scored on the same 1908 held-out test windows as the network, with the same t+15/30/60 delta targets. They are intentionally a simpler model family than monsoonplus (linear, no recurrence, no graph), so the comparison answers 'does this input help a model that could use it', not 'is monsoonplus's exact architecture optimal'.",
+    "network_ablation": {
+      "source": "ml/reports/ablations.json",
+      "method": "Each variant is a fresh network trained from scratch on identical data, seed and epoch budget (6 epochs, 25-day synthetic window, seed 2024), with the named modalities masked out of training and evaluation. A small-budget comparison that stands on its own: its numbers are NOT the final checkpoint's.",
+      "epochs_per_variant": 6,
+      "days": 25,
+      "seed": 2024,
+      "rows": [
+        {
+          "name": "traffic_only",
+          "variant": "modalities=traffic_only",
+          "mae_overall": 0.925,
+          "mae_clear": 0.866,
+          "mae_rain": 1.031,
+          "mae_heavy_rain": 1.109,
+          "rain_weighted_mae": 1.019,
+          "gate_by_regime": {
+            "clear": {
+              "traffic": 100.0,
+              "weather": 0.0,
+              "satellite": 0.0
+            },
+            "rain": {
+              "traffic": 100.0,
+              "weather": 0.0,
+              "satellite": 0.0
+            },
+            "heavy_rain": {
+              "traffic": 100.0,
+              "weather": 0.0,
+              "satellite": 0.0
+            }
+          }
+        },
+        {
+          "name": "traffic_weather",
+          "variant": "modalities=traffic_weather",
+          "mae_overall": 0.899,
+          "mae_clear": 0.839,
+          "mae_rain": 1.044,
+          "mae_heavy_rain": 1.055,
+          "rain_weighted_mae": 0.986,
+          "gate_by_regime": {
+            "clear": {
+              "traffic": 34.5,
+              "weather": 65.5,
+              "satellite": 0.0
+            },
+            "rain": {
+              "traffic": 30.8,
+              "weather": 69.2,
+              "satellite": 0.0
+            },
+            "heavy_rain": {
+              "traffic": 31.7,
+              "weather": 68.3,
+              "satellite": 0.0
+            }
+          }
+        },
+        {
+          "name": "all_three",
+          "variant": "modalities=all_three",
+          "mae_overall": 0.858,
+          "mae_clear": 0.801,
+          "mae_rain": 0.975,
+          "mae_heavy_rain": 1.023,
+          "rain_weighted_mae": 0.946,
+          "gate_by_regime": {
+            "clear": {
+              "traffic": 32.9,
+              "weather": 56.2,
+              "satellite": 10.9
+            },
+            "rain": {
+              "traffic": 30.0,
+              "weather": 58.5,
+              "satellite": 11.5
+            },
+            "heavy_rain": {
+              "traffic": 27.1,
+              "weather": 44.3,
+              "satellite": 28.6
+            }
+          }
+        }
+      ]
+    }
   },
   "forecast_grid": {
     "rain_levels": [

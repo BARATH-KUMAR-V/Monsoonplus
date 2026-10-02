@@ -254,6 +254,33 @@ export default function Forecast() {
     return { normal: build(0), monsoon: build(75) };
   }, [predictor]);
 
+  // "What if it weren't raining?" -- a counterfactual sensitivity read, not a second
+  // model. It takes the SAME trained model's own rain=0 row from the exported grid
+  // (forecast_grid always samples rain=0 - see predictor.levels) and compares it to
+  // the model's prediction at the currently selected rain level. The whole point is
+  // that both numbers come out of monsoonplus; nothing here is invented.
+  const whatIfDry = useMemo(() => {
+    if (!predictor) return null;
+    const withRain = predictor.allStates(rain, 30);
+    const dry = predictor.allStates(0, 30);
+    const rows = SEGMENTS.map((segment) => {
+      const wet = withRain.find((s) => s.segmentId === segment.id);
+      const clear = dry.find((s) => s.segmentId === segment.id);
+      if (!wet || !clear) return null;
+      return {
+        id: segment.id,
+        name: segment.name,
+        wetSpeed: wet.speed,
+        drySpeed: clear.speed,
+        delta: clear.speed - wet.speed,
+        wetLevel: wet.level,
+      };
+    }).filter(Boolean);
+    const sorted = [...rows].sort((a, b) => b.delta - a.delta);
+    const totalDelta = rows.reduce((a, r) => a + r.delta, 0) / Math.max(rows.length, 1);
+    return { rows: sorted, meanDelta: totalDelta };
+  }, [predictor, rain]);
+
   const alerts = useMemo(
     () =>
       buildAlerts({
@@ -363,6 +390,54 @@ export default function Forecast() {
           <Stat key={kpi.label} label={`Network average ${kpi.label}`} value={kmh(kpi.value)} />
         ))}
       </div>
+
+      {whatIfDry && (
+        <Card
+          title="What if it weren't raining?"
+          subtitle={`Same model, two rainfall inputs: ${mm(rain)} now versus 0 mm at t+30`}
+          actions={<Chip tone="neutral">Model estimate</Chip>}
+          style={{ marginTop: 14 }}
+        >
+          <p style={{ margin: 0, fontWeight: 650 }}>
+            At today's rainfall, the network loses{' '}
+            <strong>{whatIfDry.meanDelta.toFixed(1)} km/h</strong> on average compared to a dry
+            scenario, by the model's own t+30 prediction.
+          </p>
+          <TableScroll label="Data table, scroll horizontally">
+            <table className="data" style={{ marginTop: 10 }}>
+              <thead>
+                <tr>
+                  <th>Road</th>
+                  <th className="num">Speed now (rain)</th>
+                  <th className="num">Speed if dry</th>
+                  <th className="num">Rain costs</th>
+                  <th>Status (rain)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {whatIfDry.rows.slice(0, 6).map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.name}</td>
+                    <td className="num">{kmh(row.wetSpeed)}</td>
+                    <td className="num">{kmh(row.drySpeed)}</td>
+                    <td className="num">
+                      <strong>{row.delta >= 0 ? '-' : '+'}{Math.abs(row.delta).toFixed(1)} km/h</strong>
+                    </td>
+                    <td>
+                      <StatusChip status={row.wetLevel.key} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableScroll>
+          <Provenance>
+            Both columns are the trained model's own t+30 output, run at two different rainfall
+            inputs - rain as selected above, and rain pinned to 0. The gap is the model's learned
+            sensitivity to rainfall, not a separate rule.
+          </Provenance>
+        </Card>
+      )}
 
       <div className="grid g-2" style={{ marginTop: 14 }}>
         <Card
