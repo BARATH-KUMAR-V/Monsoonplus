@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0.0",
+  "collected_at": "2026-10-02T18:37:27+00:00",
+  "date": "2026-10-02",
+  "time": "18:37",
+  "label": "clear",
+  "rain_mm_h": 0.0,
+  "traffic_source": "not_configured",
+  "traffic_ok": false,
+  "per_segment": [
+    {
+      "segment_id": "r1",
+      "name": "200 Feet Radial Road",
+      "observed_speed_kmh": null,
+      "predicted_kmh": null,
+      "rain_mm_h": 0.0,
+      "ndwi": -0.18
+    },
+    {
+      "segment_id": "r2",
+      "name": "Velachery Main Road",
+      "observed_speed_kmh": null,
+      "predicted_kmh": null,
+      "rain_mm_h": 0.0,
+      "ndwi": -0.18
+    },
+    {
+      "segment_id": "r3",
+      "name": "OMR - Taramani to Perungudi",
+      "observed_speed_kmh": null,
+      "predicted_kmh": null,
+      "rain_mm_h": 0.0,
+      "ndwi": -0.18
+    },
+    {
+      "segment_id": "r4",
+      "name": "Anna Salai - Saidapet",
+      "observed_speed_kmh": null,
+      "predicted_kmh": null,
+      "rain_mm_h": 0.0,
+      "ndwi": -0.18
+    },
+    {
+      "segment_id": "r5",
+      "name": "Sardar Patel Road",
+      "observed_speed_kmh": null,
+      "predicted_kmh": null,
+      "rain_mm_h": 0.0,
+      "ndwi": -0.18
+    },
+    {
+      "segment_id": "r6",
+      "name": "Taramani Link Road",
+      "observed_speed_kmh": null,
+      "predicted_kmh": null,
+      "rain_mm_h": 0.0,
+      "ndwi": -0.18
+    },
+    {
+      "segment_id": "r7",
+      "name": "OMR - Perungudi to Thoraipakkam",
+      "observed_speed_kmh": null,
+      "predicted_kmh": null,
+      "rain_mm_h": 0.0,
+      "ndwi": -0.18
+    },
+    {
+      "segment_id": "r8",
+      "name": "Velachery - Pallikaranai Road",
+      "observed_speed_kmh": null,
+      "predicted_kmh": null,
+      "rain_mm_h": 0.0,
+      "ndwi": -0.18
+    },
+    {
+      "segment_id": "r9",
+      "name": "Lattice Bridge Road",
+      "observed_speed_kmh": null,
+      "predicted_kmh": null,
+      "rain_mm_h": 0.0,
+      "ndwi": -0.18
+    },
+    {
+      "segment_id": "r10",
+      "name": "Perungudi - Pallikaranai Link",
+      "observed_speed_kmh": null,
+      "predicted_kmh": null,
+      "rain_mm_h": 0.0,
+      "ndwi": -0.18
+    }
+  ],
+  "note": "One collection point. Predicted values are for t+15/30/60 from this instant; score them against the observations in the logs that follow."
+}
