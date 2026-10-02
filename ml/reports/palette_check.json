@@ -1,0 +1,100 @@
+{
+  "paper": "#FBF7EF",
+  "ink": "#16231C",
+  "status_swatch": {
+    "smooth": "#1B7A4B",
+    "slow": "#B87D04",
+    "disruption": "#D4581F",
+    "jammed": "#A3231B"
+  },
+  "status_text": {
+    "smooth": "#14603A",
+    "slow": "#7A5300",
+    "disruption": "#8F3410",
+    "jammed": "#8C1D16"
+  },
+  "contrast_text": {
+    "smooth": 7.11,
+    "slow": 6.41,
+    "disruption": 7.37,
+    "jammed": 8.54,
+    "primary": 7.33,
+    "rain": 6.62,
+    "flood": 6.91,
+    "ink": 15.22,
+    "muted": 6.22
+  },
+  "contrast_swatch_vs_paper": {
+    "smooth": 5.0,
+    "slow": 3.29,
+    "disruption": 3.77,
+    "jammed": 6.98
+  },
+  "delta_e": {
+    "normal": {
+      "smooth|slow": 38.87,
+      "smooth|disruption": 54.51,
+      "smooth|jammed": 59.19,
+      "slow|disruption": 20.09,
+      "slow|jammed": 34.03,
+      "disruption|jammed": 18.38
+    },
+    "protanopia": {
+      "smooth|slow": 16.56,
+      "smooth|disruption": 11.19,
+      "smooth|jammed": 13.38,
+      "slow|disruption": 6.77,
+      "slow|jammed": 23.68,
+      "disruption|jammed": 16.66
+    },
+    "deuteranopia": {
+      "smooth|slow": 24.48,
+      "smooth|disruption": 23.63,
+      "smooth|jammed": 14.03,
+      "slow|disruption": 1.01,
+      "slow|jammed": 18.28,
+      "disruption|jammed": 17.17
+    },
+    "tritanopia": {
+      "smooth|slow": 43.83,
+      "smooth|disruption": 48.89,
+      "smooth|jammed": 48.5,
+      "slow|disruption": 10.26,
+      "slow|jammed": 23.13,
+      "disruption|jammed": 16.27
+    }
+  },
+  "floors": {
+    "text_contrast_ratio": 4.5,
+    "graphic_contrast_ratio": 3.0,
+    "delta_e": 8.0
+  },
+  "non_colour_coding": {
+    "smooth": {
+      "glyph": "check",
+      "label": "Smooth",
+      "dash": "solid"
+    },
+    "slow": {
+      "glyph": "triangle",
+      "label": "Slow",
+      "dash": "dashed 10 6"
+    },
+    "disruption": {
+      "glyph": "diamond",
+      "label": "Disruption likely",
+      "dash": "dotted 2 7"
+    },
+    "jammed": {
+      "glyph": "square",
+      "label": "Jammed",
+      "dash": "dash-dot 14 5 3 5"
+    }
+  },
+  "problems": [],
+  "advisories": [
+    "slow vs disruption: deltaE 6.8 under protanopia. Below the floor, so these two are separated by glyph (triangle vs diamond), text label and line dash rather than by colour.",
+    "slow vs disruption: deltaE 1.0 under deuteranopia. Below the floor, so these two are separated by glyph (triangle vs diamond), text label and line dash rather than by colour."
+  ],
+  "passed": true
+}

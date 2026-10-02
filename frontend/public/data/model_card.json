@@ -1,0 +1,51 @@
+{
+  "name": "MonsoonPlusNet",
+  "task": "Road speed forecasting at t+15 / t+30 / t+60 minutes for 10 Chennai segments",
+  "architecture": "Trimodal gated fusion. GRU traffic encoder + GRU weather encoder + MLP satellite encoder, mixed by a learned per-node gate, then two rounds of GCN message passing over the segment graph, then a linear head predicting a delta from the last observed speed.",
+  "parameters": {
+    "traffic_encoder": 38336,
+    "weather_encoder": 13376,
+    "satellite_encoder": 4480,
+    "fusion_gate": 25219,
+    "spatial": 8576,
+    "head": 4355,
+    "total": 94342
+  },
+  "config": {
+    "hidden": 64,
+    "traffic_features": 3,
+    "weather_features": 3,
+    "satellite_features": 2,
+    "horizons": [
+      15,
+      30,
+      60
+    ],
+    "graph_layer": "gcn",
+    "gru_layers": 2,
+    "gat_heads": 4,
+    "dropout": 0.1
+  },
+  "training_phases": [
+    "phase 1 - pretrain traffic branch on real METR-LA (weather/satellite masked absent)",
+    "phase 2 - transfer to the synthetic Chennai window, all three modalities",
+    "phase 3 - cost-sensitive fine-tune, rain 3x / heavy rain 8x",
+    "phase 4 - real collected logs (skipped unless logs/ has data)"
+  ],
+  "model_selection": "lowest rain-weighted validation MAE, not plain validation MAE",
+  "known_limitations": [
+    "The Chennai training window is SYNTHETIC, generated from an explicit physical process. It is not measured Chennai traffic.",
+    "The satellite branch trains on synthetic NDWI derived from rainfall accumulation unless you supply a real Earth Engine export. Where that is the case, 'trimodal' means three trained branches, one of which learned from a simulated signal.",
+    "Weather is queried at one city point and spread across segments by a per-segment rain bias. It is not per-road measurement.",
+    "METR-LA is Los Angeles freeway data. Pretraining on it transfers temporal dynamics, not Chennai-specific behaviour.",
+    "This is a screening and planning aid, not a safety system. Do not use it to decide whether a flooded road is passable."
+  ],
+  "generated_at": "2026-10-01T20:50:38+00:00",
+  "attributions": [
+    "Traffic flow data (c) TomTom - Traffic Flow Segment Data",
+    "Weather data from Open-Meteo.com (CC BY 4.0)",
+    "Air quality data from Open-Meteo.com (CC BY 4.0)",
+    "(c) OpenStreetMap contributors",
+    "Contains modified Copernicus Sentinel data"
+  ]
+}

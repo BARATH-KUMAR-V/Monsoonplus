@@ -1,0 +1,50 @@
+# --- secrets: never commit these ---------------------------------------------
+.env
+.env.*
+!.env.example
+*.key
+*_secret*
+credentials.json
+
+# --- python -------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- model artefacts (regenerate with ml/training/train.py) -------------------
+ml/checkpoints/*.pt
+ml/checkpoints/*.pth
+ml/data/raw/
+*.h5
+*.npy
+
+# --- collected data -----------------------------------------------------------
+# Logs are ignored by default so a long collection run does not bloat the repo.
+# Force-add a representative day with:  git add -f logs/2026_11_14_18_30_heavy_rain.json
+logs/*.json
+collector/snapshots/
+collector/collector.db
+frontend/public/data/logs/
+frontend/public/data/logs_index.json
+
+# --- node / vite --------------------------------------------------------------
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
+
+# --- reports (regenerated; keep the directory) --------------------------------
+ml/reports/*.log
+
+# --- editors / OS -------------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

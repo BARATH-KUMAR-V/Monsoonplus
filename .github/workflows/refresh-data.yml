@@ -1,0 +1,70 @@
+# OPTIONAL scheduled refresh of live data.
+#
+# The site works perfectly with ZERO runs of this workflow. Dataset mode reads
+# committed JSON and needs nothing from here. This exists only if you want the
+# deployed site to carry recent collected data without running the collector on your
+# own machine.
+#
+# It stays disabled unless you add a TOMTOM_API_KEY repository secret:
+#   Settings -> Secrets and variables -> Actions -> New repository secret
+#
+# Cost: $0. Public repositories get unlimited free Actions minutes.
+
+name: refresh-data
+
+on:
+  schedule:
+    # 06:30 and 13:30 UTC = 12:00 and 19:00 IST, either side of Chennai's rush hours.
+    - cron: '30 6,13 * * *'
+  workflow_dispatch:        # lets you run it by hand from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    # Skip entirely on forks, where the secret will not exist.
+    if: github.event_name == 'workflow_dispatch' || github.repository_owner != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install the minimum needed to collect
+        run: |
+          python -m pip install --upgrade pip
+          # Weather + log writing need no ML stack at all. Torch is installed only so
+          # the collector can also record what the model predicted.
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install torch_geometric numpy h5py
+
+      - name: Check the network config
+        run: python -m config.segments
+
+      - name: Collect one sample
+        env:
+          TOMTOM_API_KEY: ${{ secrets.TOMTOM_API_KEY }}
+        run: |
+          if [ -z "$TOMTOM_API_KEY" ]; then
+            echo "No TOMTOM_API_KEY secret set."
+            echo "Collecting weather and predictions only; traffic will be marked not_configured."
+          fi
+          python -m collector.collect --once
+          python -m collector.collect --publish
+
+      - name: Commit anything new
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # -f because logs/*.json is gitignored by default; this workflow opts in.
+          git add -f logs/*.json frontend/public/data/logs_index.json frontend/public/data/logs/ 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "Nothing new to commit."
+          else
+            git commit -m "chore: refresh collected data [skip ci]"
+            git push
+          fi

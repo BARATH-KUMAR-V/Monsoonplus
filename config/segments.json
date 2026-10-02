@@ -1,0 +1,410 @@
+{
+  "schema_version": "1.0.0",
+  "_comment": "THE single source of truth for the monsoonplus road network. Python reads this via config/segments.py; the frontend imports it directly through Vite's JSON loader; the collector and the exporters read it too. Never duplicate this list anywhere.",
+  "city": {
+    "name": "Chennai",
+    "region": "Tamil Nadu, India",
+    "timezone": "Asia/Kolkata",
+    "center": [
+      12.992,
+      80.232
+    ],
+    "map_zoom": 12,
+    "bbox": [
+      12.925,
+      80.195,
+      13.035,
+      80.272
+    ]
+  },
+  "monsoon_calendar": {
+    "_comment": "Chennai is dominated by the NORTHEAST monsoon (Oct-Dec), unlike most of India. Used by the regime badge on the Overview page.",
+    "northeast_monsoon": {
+      "onset_month": 10,
+      "peak_month": 11,
+      "withdrawal_month": 12
+    },
+    "regimes": [
+      {
+        "months": [
+          1,
+          2
+        ],
+        "label": "Dry season",
+        "note": "Post-monsoon dry spell"
+      },
+      {
+        "months": [
+          3,
+          4,
+          5
+        ],
+        "label": "Pre-monsoon hot season",
+        "note": "Occasional thunderstorms"
+      },
+      {
+        "months": [
+          6,
+          7,
+          8,
+          9
+        ],
+        "label": "Southwest monsoon (weak here)",
+        "note": "Chennai gets little southwest monsoon rain"
+      },
+      {
+        "months": [
+          10
+        ],
+        "label": "Northeast monsoon onset",
+        "note": "Rain begins; first flooding of the year"
+      },
+      {
+        "months": [
+          11
+        ],
+        "label": "Northeast monsoon peak",
+        "note": "Wettest month; highest flood risk"
+      },
+      {
+        "months": [
+          12
+        ],
+        "label": "Northeast monsoon withdrawal",
+        "note": "Rain easing but heavy events still occur"
+      }
+    ]
+  },
+  "junctions": [
+    {
+      "id": "VEL",
+      "name": "Velachery",
+      "lat": 12.9791,
+      "lon": 80.2209,
+      "elevation_m": 9,
+      "note": "Low-lying; chronic monsoon flooding"
+    },
+    {
+      "id": "GUI",
+      "name": "Guindy",
+      "lat": 13.0067,
+      "lon": 80.2206,
+      "elevation_m": 14,
+      "note": "Major interchange"
+    },
+    {
+      "id": "SAI",
+      "name": "Saidapet",
+      "lat": 13.0213,
+      "lon": 80.2231,
+      "elevation_m": 11,
+      "note": "Adyar river crossing"
+    },
+    {
+      "id": "ADY",
+      "name": "Adyar",
+      "lat": 13.0063,
+      "lon": 80.2575,
+      "elevation_m": 7,
+      "note": "Coastal, near river mouth"
+    },
+    {
+      "id": "TAR",
+      "name": "Taramani",
+      "lat": 12.9858,
+      "lon": 80.242,
+      "elevation_m": 11,
+      "note": "IT corridor feeder"
+    },
+    {
+      "id": "PER",
+      "name": "Perungudi",
+      "lat": 12.9654,
+      "lon": 80.2461,
+      "elevation_m": 8,
+      "note": "Beside Pallikaranai marsh"
+    },
+    {
+      "id": "THO",
+      "name": "Thoraipakkam",
+      "lat": 12.939,
+      "lon": 80.237,
+      "elevation_m": 6,
+      "note": "OMR south; waterlogs badly"
+    },
+    {
+      "id": "PAL",
+      "name": "Pallikaranai",
+      "lat": 12.95,
+      "lon": 80.213,
+      "elevation_m": 5,
+      "note": "Marshland; lowest point in the network"
+    }
+  ],
+  "segments": [
+    {
+      "id": "r1",
+      "name": "200 Feet Radial Road",
+      "a": "PAL",
+      "b": "THO",
+      "free_flow_kmh": 33,
+      "rain_sensitivity": 0.34,
+      "base_congestion": 0.2,
+      "rain_bias": 1.05,
+      "lanes": 6,
+      "flood_history": "moderate",
+      "note": "Highest baseline congestion in the network"
+    },
+    {
+      "id": "r2",
+      "name": "Velachery Main Road",
+      "a": "GUI",
+      "b": "VEL",
+      "free_flow_kmh": 34,
+      "rain_sensitivity": 0.55,
+      "base_congestion": 0.12,
+      "rain_bias": 1.1,
+      "lanes": 4,
+      "flood_history": "severe",
+      "note": "Flood-sensitive; well-known monsoon choke point"
+    },
+    {
+      "id": "r3",
+      "name": "OMR - Taramani to Perungudi",
+      "a": "TAR",
+      "b": "PER",
+      "free_flow_kmh": 32,
+      "rain_sensitivity": 0.48,
+      "base_congestion": 0.16,
+      "rain_bias": 1.0,
+      "lanes": 6,
+      "flood_history": "moderate",
+      "note": "Congestion-dominant IT corridor"
+    },
+    {
+      "id": "r4",
+      "name": "Anna Salai - Saidapet",
+      "a": "SAI",
+      "b": "GUI",
+      "free_flow_kmh": 32,
+      "rain_sensitivity": 0.26,
+      "base_congestion": 0.08,
+      "rain_bias": 0.9,
+      "lanes": 6,
+      "flood_history": "low",
+      "note": "Arterial; drains relatively well"
+    },
+    {
+      "id": "r5",
+      "name": "Sardar Patel Road",
+      "a": "GUI",
+      "b": "ADY",
+      "free_flow_kmh": 35,
+      "rain_sensitivity": 0.3,
+      "base_congestion": 0.05,
+      "rain_bias": 0.95,
+      "lanes": 4,
+      "flood_history": "low",
+      "note": "Steady flow; campus stretch"
+    },
+    {
+      "id": "r6",
+      "name": "Taramani Link Road",
+      "a": "VEL",
+      "b": "TAR",
+      "free_flow_kmh": 33,
+      "rain_sensitivity": 0.52,
+      "base_congestion": 0.11,
+      "rain_bias": 1.05,
+      "lanes": 4,
+      "flood_history": "severe",
+      "note": "Flood-sensitive corridor"
+    },
+    {
+      "id": "r7",
+      "name": "OMR - Perungudi to Thoraipakkam",
+      "a": "PER",
+      "b": "THO",
+      "free_flow_kmh": 34,
+      "rain_sensitivity": 0.4,
+      "base_congestion": 0.14,
+      "rain_bias": 1.1,
+      "lanes": 6,
+      "flood_history": "moderate",
+      "note": "Rain-exposed stretch of OMR"
+    },
+    {
+      "id": "r8",
+      "name": "Velachery - Pallikaranai Road",
+      "a": "VEL",
+      "b": "PAL",
+      "free_flow_kmh": 30,
+      "rain_sensitivity": 0.6,
+      "base_congestion": 0.1,
+      "rain_bias": 1.15,
+      "lanes": 2,
+      "flood_history": "severe",
+      "note": "Marsh-side; floods first in the network"
+    },
+    {
+      "id": "r9",
+      "name": "Lattice Bridge Road",
+      "a": "ADY",
+      "b": "TAR",
+      "free_flow_kmh": 31,
+      "rain_sensitivity": 0.28,
+      "base_congestion": 0.07,
+      "rain_bias": 1.0,
+      "lanes": 4,
+      "flood_history": "low",
+      "note": "Coastal link"
+    },
+    {
+      "id": "r10",
+      "name": "Perungudi - Pallikaranai Link",
+      "a": "PAL",
+      "b": "PER",
+      "free_flow_kmh": 31,
+      "rain_sensitivity": 0.44,
+      "base_congestion": 0.09,
+      "rain_bias": 1.1,
+      "lanes": 2,
+      "flood_history": "moderate",
+      "note": "Rain-exposed marsh edge"
+    }
+  ],
+  "landmarks": [
+    {
+      "name": "Velachery MRTS Station",
+      "junction": "VEL"
+    },
+    {
+      "name": "Phoenix MarketCity",
+      "junction": "VEL"
+    },
+    {
+      "name": "Guindy Railway Station",
+      "junction": "GUI"
+    },
+    {
+      "name": "IIT Madras Main Gate",
+      "junction": "ADY"
+    },
+    {
+      "name": "Saidapet Metro",
+      "junction": "SAI"
+    },
+    {
+      "name": "Adyar Signal",
+      "junction": "ADY"
+    },
+    {
+      "name": "Tidel Park",
+      "junction": "TAR"
+    },
+    {
+      "name": "Perungudi Toll Plaza",
+      "junction": "PER"
+    },
+    {
+      "name": "Thoraipakkam Junction",
+      "junction": "THO"
+    },
+    {
+      "name": "Pallikaranai Marsh View",
+      "junction": "PAL"
+    }
+  ],
+  "model": {
+    "_comment": "Shared model constants. ml/ reads these for training; the frontend reads them for labels and axis ranges.",
+    "history_steps": 24,
+    "step_minutes": 5,
+    "horizons_minutes": [
+      15,
+      30,
+      60
+    ],
+    "traffic_features": [
+      "speed_kmh",
+      "free_flow_kmh",
+      "confidence"
+    ],
+    "weather_features": [
+      "rain_mm_h",
+      "temp_c",
+      "wind_kmh"
+    ],
+    "satellite_features": [
+      "ndwi",
+      "wetness_anomaly"
+    ],
+    "road_length_detour_factor": 1.25,
+    "adjacency_threshold": 0.1
+  },
+  "thresholds": {
+    "_comment": "Plain threshold rules. These are rules, NOT a trained model -- the README and the UI both say so.",
+    "rain_buckets": {
+      "dry_max": 3.0,
+      "light_max": 15.0,
+      "moderate_max": 40.0,
+      "heavy_max": 70.0
+    },
+    "rain_regimes": {
+      "dry_max": 3.0,
+      "steady_max": 55.0
+    },
+    "rain_weights": {
+      "clear": 1.0,
+      "rain": 3.0,
+      "heavy_rain": 8.0
+    },
+    "rain_label_mm_h": {
+      "rain_min": 2.5,
+      "heavy_rain_min": 15.0
+    },
+    "flood_risk": {
+      "moderate_min": 18.0,
+      "high_min": 40.0
+    },
+    "congestion_levels": [
+      {
+        "label": "Smooth",
+        "glyph": "check",
+        "min_speed_ratio": 0.82
+      },
+      {
+        "label": "Slow",
+        "glyph": "up",
+        "min_speed_ratio": 0.62
+      },
+      {
+        "label": "Disruption likely",
+        "glyph": "alert",
+        "min_speed_ratio": 0.4
+      },
+      {
+        "label": "Jammed",
+        "glyph": "block",
+        "min_speed_ratio": 0.0
+      }
+    ],
+    "impact_score_weights": {
+      "traffic": 0.4,
+      "rain": 0.25,
+      "flood": 0.2,
+      "deterioration": 0.15
+    },
+    "routing_penalties": {
+      "flood_high": 4.0,
+      "flood_moderate": 1.35,
+      "alt_route_reuse": 1.7
+    }
+  },
+  "attributions": [
+    "Traffic flow data (c) TomTom - Traffic Flow Segment Data",
+    "Weather data from Open-Meteo.com (CC BY 4.0)",
+    "Air quality data from Open-Meteo.com (CC BY 4.0)",
+    "(c) OpenStreetMap contributors",
+    "Contains modified Copernicus Sentinel data"
+  ]
+}

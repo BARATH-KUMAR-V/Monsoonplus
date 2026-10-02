@@ -1,0 +1,27 @@
+# monsoonplus - Python dependencies
+#
+# Install the CPU build of PyTorch first (it is the only step with a custom index):
+#
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+#
+# On Colab, torch and CUDA are already present -- just run `pip install -r requirements.txt`.
+
+torch>=2.2            # CPU build is fine; Colab's GPU build also works
+torch_geometric>=2.5  # GCNConv / GATConv. Pure Python, no compiled extensions needed.
+
+numpy>=1.26
+h5py>=3.10            # reads metr-la.h5 directly; pandas.read_hdf cannot (see README troubleshooting)
+
+# --- optional, for the local backend and collector only -----------------------
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+
+# --- optional, for tests -------------------------------------------------------
+pytest>=8.0
+
+# NOT required:
+#   pandas   - only used for ad-hoc analysis; nothing in the pipeline needs it
+#   earthengine-api - optional, only if you want real Sentinel-2 NDWI (README section 7)
+#   requests / httpx - the collector uses urllib from the standard library

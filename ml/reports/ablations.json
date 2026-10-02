@@ -1,0 +1,152 @@
+{
+  "epochs_per_variant": 6,
+  "days": 25,
+  "seed": 2024,
+  "rows": [
+    {
+      "name": "gcn",
+      "variant": "graph_layer=gcn",
+      "mae_overall": 0.858,
+      "mae_clear": 0.801,
+      "mae_rain": 0.975,
+      "mae_heavy_rain": 1.023,
+      "rain_weighted_mae": 0.946,
+      "gate_by_regime": {
+        "clear": {
+          "traffic": 32.9,
+          "weather": 56.2,
+          "satellite": 10.9
+        },
+        "rain": {
+          "traffic": 30.0,
+          "weather": 58.5,
+          "satellite": 11.5
+        },
+        "heavy_rain": {
+          "traffic": 27.1,
+          "weather": 44.3,
+          "satellite": 28.6
+        }
+      },
+      "epochs_run": 6,
+      "seconds": 64.8
+    },
+    {
+      "name": "gat",
+      "variant": "graph_layer=gat",
+      "mae_overall": 0.871,
+      "mae_clear": 0.82,
+      "mae_rain": 0.972,
+      "mae_heavy_rain": 1.019,
+      "rain_weighted_mae": 0.949,
+      "gate_by_regime": {
+        "clear": {
+          "traffic": 37.3,
+          "weather": 50.8,
+          "satellite": 11.9
+        },
+        "rain": {
+          "traffic": 37.5,
+          "weather": 45.7,
+          "satellite": 16.8
+        },
+        "heavy_rain": {
+          "traffic": 44.0,
+          "weather": 37.8,
+          "satellite": 18.2
+        }
+      },
+      "epochs_run": 6,
+      "seconds": 70.5
+    },
+    {
+      "name": "traffic_only",
+      "variant": "modalities=traffic_only",
+      "mae_overall": 0.925,
+      "mae_clear": 0.866,
+      "mae_rain": 1.031,
+      "mae_heavy_rain": 1.109,
+      "rain_weighted_mae": 1.019,
+      "gate_by_regime": {
+        "clear": {
+          "traffic": 100.0,
+          "weather": 0.0,
+          "satellite": 0.0
+        },
+        "rain": {
+          "traffic": 100.0,
+          "weather": 0.0,
+          "satellite": 0.0
+        },
+        "heavy_rain": {
+          "traffic": 100.0,
+          "weather": 0.0,
+          "satellite": 0.0
+        }
+      },
+      "epochs_run": 6,
+      "seconds": 69.1
+    },
+    {
+      "name": "traffic_weather",
+      "variant": "modalities=traffic_weather",
+      "mae_overall": 0.899,
+      "mae_clear": 0.839,
+      "mae_rain": 1.044,
+      "mae_heavy_rain": 1.055,
+      "rain_weighted_mae": 0.986,
+      "gate_by_regime": {
+        "clear": {
+          "traffic": 34.5,
+          "weather": 65.5,
+          "satellite": 0.0
+        },
+        "rain": {
+          "traffic": 30.8,
+          "weather": 69.2,
+          "satellite": 0.0
+        },
+        "heavy_rain": {
+          "traffic": 31.7,
+          "weather": 68.3,
+          "satellite": 0.0
+        }
+      },
+      "epochs_run": 6,
+      "seconds": 70.9
+    },
+    {
+      "name": "all_three",
+      "variant": "modalities=all_three",
+      "mae_overall": 0.858,
+      "mae_clear": 0.801,
+      "mae_rain": 0.975,
+      "mae_heavy_rain": 1.023,
+      "rain_weighted_mae": 0.946,
+      "gate_by_regime": {
+        "clear": {
+          "traffic": 32.9,
+          "weather": 56.2,
+          "satellite": 10.9
+        },
+        "rain": {
+          "traffic": 30.0,
+          "weather": 58.5,
+          "satellite": 11.5
+        },
+        "heavy_rain": {
+          "traffic": 27.1,
+          "weather": 44.3,
+          "satellite": 28.6
+        }
+      },
+      "epochs_run": 6,
+      "seconds": 64.8
+    }
+  ],
+  "interpretation": [
+    "GCN and GAT are effectively tied on rain-weighted MAE (0.946 vs 0.949). On a 10-node graph attention has little room to help; GCN stays the default because it is cheaper.",
+    "Adding weather and satellite cuts heavy-rain MAE by 0.085 km/h (1.109 -> 1.023), which is the trimodal claim holding up where it matters.",
+    "The satellite channel alone is worth 0.032 km/h of heavy-rain MAE on top of traffic+weather."
+  ]
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#FBF7EF" />
+    <meta
+      name="description"
+      content="monsoonplus - Chennai monsoon traffic intelligence. Road speed forecasts at t+15/30/60 minutes from a trimodal gated-fusion graph neural network."
+    />
+    <title>monsoonplus - Chennai monsoon traffic</title>
+    <!--
+      No external font, script or stylesheet is loaded here on purpose. The only
+      network request the app makes is for OpenStreetMap map tiles, and the UI keeps
+      working (with a plain-coloured map background) when those are unreachable.
+    -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231F5C47'/%3E%3Cpath d='M9 19c0-4 7-11 7-11s7 7 7 11a7 7 0 1 1-14 0z' fill='%23FBF7EF'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      monsoonplus needs JavaScript to render its maps and charts. The underlying data
+      files are plain JSON under /data/ if you would rather read them directly.
+    </noscript>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

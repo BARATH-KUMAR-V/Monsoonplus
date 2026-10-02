@@ -1,0 +1,239 @@
+{
+  "schema_version": "1.0.0",
+  "mode": "live",
+  "generated_at": null,
+  "is_real": null,
+  "sources": {
+    "traffic": {
+      "name": "TomTom Flow Segment Data",
+      "source": null,
+      "fetched_at": null,
+      "ok": null
+    },
+    "weather": {
+      "name": "Open-Meteo",
+      "source": null,
+      "fetched_at": null,
+      "ok": null
+    },
+    "satellite": {
+      "name": "Sentinel-2 NDWI",
+      "source": null,
+      "fetched_at": null,
+      "ok": null
+    }
+  },
+  "per_segment": [
+    {
+      "segment_id": "r1",
+      "speed_kmh": null,
+      "free_flow_kmh": null,
+      "confidence": null,
+      "rain_mm_h": null,
+      "temp_c": null,
+      "wind_kmh": null,
+      "ndwi": null,
+      "wetness": null,
+      "predicted_kmh": {
+        "t+15": null,
+        "t+30": null,
+        "t+60": null
+      },
+      "gate": {
+        "traffic": null,
+        "weather": null,
+        "satellite": null
+      }
+    },
+    {
+      "segment_id": "r2",
+      "speed_kmh": null,
+      "free_flow_kmh": null,
+      "confidence": null,
+      "rain_mm_h": null,
+      "temp_c": null,
+      "wind_kmh": null,
+      "ndwi": null,
+      "wetness": null,
+      "predicted_kmh": {
+        "t+15": null,
+        "t+30": null,
+        "t+60": null
+      },
+      "gate": {
+        "traffic": null,
+        "weather": null,
+        "satellite": null
+      }
+    },
+    {
+      "segment_id": "r3",
+      "speed_kmh": null,
+      "free_flow_kmh": null,
+      "confidence": null,
+      "rain_mm_h": null,
+      "temp_c": null,
+      "wind_kmh": null,
+      "ndwi": null,
+      "wetness": null,
+      "predicted_kmh": {
+        "t+15": null,
+        "t+30": null,
+        "t+60": null
+      },
+      "gate": {
+        "traffic": null,
+        "weather": null,
+        "satellite": null
+      }
+    },
+    {
+      "segment_id": "r4",
+      "speed_kmh": null,
+      "free_flow_kmh": null,
+      "confidence": null,
+      "rain_mm_h": null,
+      "temp_c": null,
+      "wind_kmh": null,
+      "ndwi": null,
+      "wetness": null,
+      "predicted_kmh": {
+        "t+15": null,
+        "t+30": null,
+        "t+60": null
+      },
+      "gate": {
+        "traffic": null,
+        "weather": null,
+        "satellite": null
+      }
+    },
+    {
+      "segment_id": "r5",
+      "speed_kmh": null,
+      "free_flow_kmh": null,
+      "confidence": null,
+      "rain_mm_h": null,
+      "temp_c": null,
+      "wind_kmh": null,
+      "ndwi": null,
+      "wetness": null,
+      "predicted_kmh": {
+        "t+15": null,
+        "t+30": null,
+        "t+60": null
+      },
+      "gate": {
+        "traffic": null,
+        "weather": null,
+        "satellite": null
+      }
+    },
+    {
+      "segment_id": "r6",
+      "speed_kmh": null,
+      "free_flow_kmh": null,
+      "confidence": null,
+      "rain_mm_h": null,
+      "temp_c": null,
+      "wind_kmh": null,
+      "ndwi": null,
+      "wetness": null,
+      "predicted_kmh": {
+        "t+15": null,
+        "t+30": null,
+        "t+60": null
+      },
+      "gate": {
+        "traffic": null,
+        "weather": null,
+        "satellite": null
+      }
+    },
+    {
+      "segment_id": "r7",
+      "speed_kmh": null,
+      "free_flow_kmh": null,
+      "confidence": null,
+      "rain_mm_h": null,
+      "temp_c": null,
+      "wind_kmh": null,
+      "ndwi": null,
+      "wetness": null,
+      "predicted_kmh": {
+        "t+15": null,
+        "t+30": null,
+        "t+60": null
+      },
+      "gate": {
+        "traffic": null,
+        "weather": null,
+        "satellite": null
+      }
+    },
+    {
+      "segment_id": "r8",
+      "speed_kmh": null,
+      "free_flow_kmh": null,
+      "confidence": null,
+      "rain_mm_h": null,
+      "temp_c": null,
+      "wind_kmh": null,
+      "ndwi": null,
+      "wetness": null,
+      "predicted_kmh": {
+        "t+15": null,
+        "t+30": null,
+        "t+60": null
+      },
+      "gate": {
+        "traffic": null,
+        "weather": null,
+        "satellite": null
+      }
+    },
+    {
+      "segment_id": "r9",
+      "speed_kmh": null,
+      "free_flow_kmh": null,
+      "confidence": null,
+      "rain_mm_h": null,
+      "temp_c": null,
+      "wind_kmh": null,
+      "ndwi": null,
+      "wetness": null,
+      "predicted_kmh": {
+        "t+15": null,
+        "t+30": null,
+        "t+60": null
+      },
+      "gate": {
+        "traffic": null,
+        "weather": null,
+        "satellite": null
+      }
+    },
+    {
+      "segment_id": "r10",
+      "speed_kmh": null,
+      "free_flow_kmh": null,
+      "confidence": null,
+      "rain_mm_h": null,
+      "temp_c": null,
+      "wind_kmh": null,
+      "ndwi": null,
+      "wetness": null,
+      "predicted_kmh": {
+        "t+15": null,
+        "t+30": null,
+        "t+60": null
+      },
+      "gate": {
+        "traffic": null,
+        "weather": null,
+        "satellite": null
+      }
+    }
+  ],
+  "note": "TEMPLATE ONLY -- this file documents the shape the collector writes. It contains no data. Run collector/collect.py to produce a real live file."
+}
