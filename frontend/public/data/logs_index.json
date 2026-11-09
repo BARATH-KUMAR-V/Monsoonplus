@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-11-08T13:46:17+00:00",
-  "count": 59,
+  "generated_at": "2026-11-09T16:46:05+00:00",
+  "count": 60,
   "entries": [
+    {
+      "file": "2026_11_09_16_46_clear.json",
+      "date": "2026-11-09",
+      "time": "16:46",
+      "label": "clear",
+      "bytes": 2274
+    },
     {
       "file": "2026_11_08_13_46_clear.json",
       "date": "2026-11-08",
@@ -417,9 +424,9 @@
     }
   ],
   "label_counts": {
-    "clear": 53,
-    "heavy_rain": 2,
-    "rain": 4
+    "clear": 54,
+    "rain": 4,
+    "heavy_rain": 2
   },
   "note": "Written by collector/store.py. Page 5's real replay and the pattern cards need several rainy days plus a clear day before they say anything useful."
 }
